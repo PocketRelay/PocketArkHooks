@@ -3,7 +3,7 @@ use windows_sys::Win32::{
     Foundation::FALSE,
     System::{
         Memory::{VirtualProtect, PAGE_PROTECTION_FLAGS, PAGE_READWRITE},
-        SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
+        SystemServices::DLL_PROCESS_ATTACH,
     },
 };
 
@@ -156,10 +156,8 @@ fn attach() {
 #[no_mangle]
 #[allow(non_snake_case, unused_variables)]
 extern "system" fn DllMain(dll_module: usize, call_reason: u32, _: *mut ()) -> bool {
-    match call_reason {
-        DLL_PROCESS_ATTACH => attach(),
-        DLL_PROCESS_DETACH => (),
-        _ => (),
+    if call_reason == DLL_PROCESS_ATTACH {
+        attach();
     }
 
     true
