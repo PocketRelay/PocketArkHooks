@@ -20,3 +20,12 @@ features = [
     "Win32_System_SystemServices",
     "Win32_System_Memory",
 ]
+
+# Compile std to reduce size:
+# cargo +nightly build -Z build-std=std,panic_abort --release --target x86_64-pc-windows-msvc
+# [profile.release]
+# opt-level = "z"
+# codegen-units = 1
+# panic = "abort"
+# strip = true
+# lto = true
