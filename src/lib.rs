@@ -1,6 +1,7 @@
 #![allow(clippy::missing_safety_doc)]
 
 use windows_sys::Win32::System::{
+    Console::{AllocConsole, FreeConsole},
     LibraryLoader::FreeLibrary,
     SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
 };
@@ -13,6 +14,9 @@ pub mod proxy;
 unsafe extern "system" fn DllMain(dll_module: usize, call_reason: u32, _: *mut ()) -> bool {
     match call_reason {
         DLL_PROCESS_ATTACH => {
+            // Allocate a console
+            AllocConsole();
+
             // initialize the proxy
             proxy::init();
             // Handles the DLL being attached to the game
@@ -23,6 +27,9 @@ unsafe extern "system" fn DllMain(dll_module: usize, call_reason: u32, _: *mut (
             if let Some(handle) = proxy::PROXY_HANDLE.take() {
                 FreeLibrary(handle);
             }
+
+            // Free the console
+            FreeConsole();
         }
         _ => {}
     }

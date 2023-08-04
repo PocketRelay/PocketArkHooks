@@ -1,8 +1,14 @@
 use std::ffi::c_void;
 use windows_sys::Win32::{
-    Foundation::FALSE,
+    Foundation::{GetLastError, FALSE, NTSTATUS},
     System::Memory::{VirtualProtect, PAGE_PROTECTION_FLAGS, PAGE_READWRITE},
 };
+
+const BCRYPT_CALL_OP_MASK: &[u8] = &[
+    0xFF, 0x15, 0x00, 0x00, 0x00, 0x00, 0x48, 0x8B, 0x4C, 0x24, 0x40, 0x85, 0xC0,
+];
+
+const BCRYPT_CALL_STR_MASK: &str = "xx????xxxxxxx";
 
 /// The mask to match the opcodes with
 const VERIFY_CERTIFICATE_STR_MASK: &str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\
@@ -83,6 +89,7 @@ unsafe fn find_pattern(start: u64, end: u64, op_mask: &[u8], str_mask: &str) -> 
 
 pub unsafe fn hook() {
     verify_certificate();
+    bcrypt_verify_signature();
 }
 
 /// Finds and hooks the VerifyCertificate function replacing it with
@@ -147,4 +154,71 @@ unsafe fn verify_certificate() {
         old_protect,
         &mut old_protect,
     );
+}
+
+/// Finds and hooks the VerifyCertificate function replacing it with
+/// something that will always return zero aka the success value
+unsafe fn bcrypt_verify_signature() {
+    // Last known addr: 0x0000000140CDCB30
+
+    let start_addr: u64 = 0x0000000140100000;
+    let end_addr: u64 = 0x0000000200000000;
+
+    // Find the pattern for VerifyCertificate
+    let call_addr = find_pattern(
+        start_addr,
+        end_addr,
+        BCRYPT_CALL_OP_MASK,
+        BCRYPT_CALL_STR_MASK,
+    );
+
+    let call_addr: *const u8 = match call_addr {
+        Some(value) => value.cast(),
+        None => {
+            println!("Failed to find BCrypt hook position");
+            return;
+        }
+    };
+
+    println!("Found BCrypt @ {:#016x}", call_addr as usize);
+
+    let distance = *(call_addr.add(2).cast::<i32>());
+    let call_addr = call_addr.add(6 + distance as usize);
+
+    let mut old_protect: PAGE_PROTECTION_FLAGS = 0;
+    // Protect the memory region
+    if VirtualProtect(
+        call_addr as *const c_void,
+        8,
+        PAGE_READWRITE,
+        &mut old_protect,
+    ) == FALSE
+    {
+        let err = GetLastError();
+        println!(
+            "Failed to protect memory region while hooking BCrypt: {:#04x}",
+            err
+        );
+        return;
+    }
+
+    let ptr = call_addr as *mut usize;
+    *ptr = fake_bcrypt_verify_signature as usize;
+
+    // Unprotect the memory region
+    VirtualProtect(call_addr as *const c_void, 8, old_protect, &mut old_protect);
+}
+
+#[no_mangle]
+#[allow(non_snake_case, unused_variables)]
+fn fake_bcrypt_verify_signature(
+    hKey: isize,
+    pPaddingInfo: *const c_void,
+    pbHash: *const u8,
+    cbHash: u64,
+    pbSignature: *const u8,
+    cbSignature: u64,
+    dwFlags: u64,
+) -> NTSTATUS {
+    0
 }

@@ -16,6 +16,8 @@ crate-type = ["cdylib"]
 [build-dependencies]
 exe = "^0.5.6"
 
+[dependencies]
+
 [dependencies.windows-sys]
 version = "0.48"
 features = [
@@ -23,6 +25,7 @@ features = [
     "Win32_System_SystemServices",
     "Win32_System_Memory",
     "Win32_System_LibraryLoader",
+    "Win32_System_Console",
 ]
 
 
