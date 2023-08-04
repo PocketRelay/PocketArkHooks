@@ -1,0 +1,34 @@
+EXPORTS
+	markHdrBufferFinished
+	rotationMatrixVectorsToQuaternion
+	getConfigurationSize
+	setSessionFunctions
+	removeUserControl
+	getHdrBufferFinishedHintActive
+	setStopSessionCallback
+	getSessionConfigurationSize
+	isUserControlDescListDirty
+	initializeSessionConfiguration
+	userControlValueChanged
+	lockUserControlDescriptions
+	setUserControlLabelLocalization
+	markHdrBufferBind
+	setConfiguration
+	quaternionToRotationMatrixVectors
+	getVersion
+	initializeConfiguration
+	unlockUserControlDescriptions
+	clearHdrBufferBindHint
+	startSession
+	setUpdateCameraFunc
+	getUserControlDescriptionsSize
+	addUserControl
+	getConfiguration
+	getHdrBufferBindHintActive
+	clearHdrBufferFinishedHint
+	isAnselAvailable
+	clearUserControlDescListDirtyFlag
+	stopSession
+	updateCamera
+	getUserControlDescription
+

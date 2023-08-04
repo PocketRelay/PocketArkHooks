@@ -1,11 +1,16 @@
+#![allow(clippy::missing_safety_doc)]
+
 use std::ffi::c_void;
 use windows_sys::Win32::{
     Foundation::FALSE,
     System::{
+        LibraryLoader::FreeLibrary,
         Memory::{VirtualProtect, PAGE_PROTECTION_FLAGS, PAGE_READWRITE},
-        SystemServices::DLL_PROCESS_ATTACH,
+        SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
     },
 };
+
+pub mod proxy;
 
 /// The mask to match the opcodes with
 const VERIFY_CERTIFICATE_STR_MASK: &str = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\
@@ -155,9 +160,21 @@ fn attach() {
 
 #[no_mangle]
 #[allow(non_snake_case, unused_variables)]
-extern "system" fn DllMain(dll_module: usize, call_reason: u32, _: *mut ()) -> bool {
+unsafe extern "system" fn DllMain(dll_module: usize, call_reason: u32, _: *mut ()) -> bool {
+    let handle = proxy::init();
+
     if call_reason == DLL_PROCESS_ATTACH {
         attach();
+    }
+
+    match call_reason {
+        DLL_PROCESS_ATTACH => attach(),
+        DLL_PROCESS_DETACH => {
+            if let Some(handle) = handle {
+                FreeLibrary(handle);
+            }
+        }
+        _ => {}
     }
 
     true
