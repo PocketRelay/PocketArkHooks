@@ -24,6 +24,6 @@ pub unsafe fn init() -> Option<isize> {
         *addr = GetProcAddress(handle, symbol.as_ptr()).expect("Missing function") as *const ();
     }
 
-    return Some(handle);
+    Some(handle)
 }
     
