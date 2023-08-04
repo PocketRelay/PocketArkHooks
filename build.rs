@@ -11,13 +11,15 @@ fn main() {
     let image = VecPE::from_disk_file(LIBRARY_DLL).expect("Failed to load AnselSDK64.bak");
     let export_directory = ExportDirectory::parse(&image).expect("Failed to load export directory");
 
-    let exports: Vec<&str> = export_directory
+    let mut exports: Vec<&str> = export_directory
         .get_export_map(&image)
         .expect("Failed to get export map")
         .into_iter()
         .filter(|(_, value)| matches!(value, ThunkData::Function(_)))
         .map(|(key, _)| key)
         .collect();
+
+    exports.sort();
 
     write_asm_x64(&exports);
     write_asm_x86(&exports);
@@ -73,7 +75,6 @@ pub unsafe fn init() -> Option<isize> {{
 
     return Some(handle);
 }}
-    
     "#
     )
     .unwrap();
