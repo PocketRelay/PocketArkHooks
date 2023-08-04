@@ -53,6 +53,7 @@ use windows_sys::Win32::System::LibraryLoader::{{GetProcAddress, LoadLibraryA}};
 
 #[no_mangle]
 pub static mut ADDR_TABLE: [*const (); {export_len}] = [std::ptr::null(); {export_len}];
+pub static mut PROXY_HANDLE: Option<isize> = None;
 
 #[cfg(target_pointer_width = "64")]
 global_asm!(include_str!("ansel.x64.S"));
@@ -60,20 +61,20 @@ global_asm!(include_str!("ansel.x64.S"));
 global_asm!(include_str!("ansel.x86.S"));
     
 // # Safety
-pub unsafe fn init() -> Option<isize> {{
+pub unsafe fn init() {{
     let handle = LoadLibraryA("{runtime_dll}\0".as_ptr());
     if handle == 0 {{
         eprintln!("Failed to load library");
-        return None;
+        return;
     }}
+
+    PROXY_HANDLE = Some(handle);
 
     let symbols: [&str; 32] = [{export_list}];
 
     for (symbol, addr) in symbols.iter().zip(ADDR_TABLE.iter_mut()) {{
         *addr = GetProcAddress(handle, symbol.as_ptr()).expect("Missing function") as *const ();
     }}
-
-    Some(handle)
 }}
     "#
     )
