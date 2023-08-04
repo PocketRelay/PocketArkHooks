@@ -47,7 +47,7 @@ unsafe extern "system" fn DllMain(dll_module: usize, call_reason: u32, _: *mut (
 fn load_plugins() {
     let path = Path::new("ASI");
     if !path.exists() {
-        print!("No ASI plugins loaded");
+        println!("No ASI plugins loaded");
         return;
     }
 
