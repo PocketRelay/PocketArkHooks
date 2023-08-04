@@ -11,6 +11,7 @@ keywords = ["Hooking"]
 build = "build.rs"
 
 [lib]
+name = "AnselSDK64"
 crate-type = ["cdylib"]
 
 [build-dependencies]
@@ -27,7 +28,6 @@ features = [
     "Win32_System_LibraryLoader",
     "Win32_System_Console",
 ]
-
 
 # Compile std to reduce size:
 # cargo +nightly build -Z build-std=std,panic_abort --release --target x86_64-pc-windows-msvc
