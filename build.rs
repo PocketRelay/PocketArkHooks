@@ -70,7 +70,7 @@ pub unsafe fn init() {{
 
     PROXY_HANDLE = Some(handle);
 
-    let symbols: [&str; 32] = [{export_list}];
+    let symbols: [&str; {export_len}] = [{export_list}];
 
     for (symbol, addr) in symbols.iter().zip(ADDR_TABLE.iter_mut()) {{
         *addr = GetProcAddress(handle, symbol.as_ptr()).expect("Missing function") as *const ();
