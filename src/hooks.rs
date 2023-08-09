@@ -81,10 +81,10 @@ unsafe fn compare_mask(addr: *const u8, op_mask: &[u8], str_mask: &str) -> bool 
 /// * end - The address to end searching at
 /// * op_mask - The opcodes to match against
 /// * str_mask - The str pattern defining how to match the opcodes
-unsafe fn find_pattern(start: u64, end: u64, op_mask: &[u8], str_mask: &str) -> Option<*const u64> {
+unsafe fn find_pattern(start: u64, end: u64, op_mask: &[u8], str_mask: &str) -> Option<*const u8> {
     (start..=end)
-        .map(|addr| addr as *const u64)
-        .find(|addr| compare_mask(addr.cast(), op_mask, str_mask))
+        .map(|addr| addr as *const u8)
+        .find(|addr| compare_mask(*addr, op_mask, str_mask))
 }
 
 pub unsafe fn hook() {
