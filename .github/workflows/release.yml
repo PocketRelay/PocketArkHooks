@@ -25,7 +25,7 @@ jobs:
 
             # Compile the binary
             - name: Build with ${{ matrix.target }}
-              run: cross build --release
+              run: cargo build --release
 
             # Copy built binary to output directory
             - name: Copy binary to output
