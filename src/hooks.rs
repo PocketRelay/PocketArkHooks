@@ -100,7 +100,7 @@ unsafe fn bcrypt_verify_signature() {
     Pattern::apply_with_transform(
         &BCRYPT_PATTERN,
         8,
-        // Transform the address to the desired locaiton
+        // Transform the address to the desired location
         |addr: *const u8| {
             // Skip "call QWORD PTR"
             let call_addr = addr.add(2) as *const i32;
